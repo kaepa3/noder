@@ -12,6 +12,10 @@ client.on('error', function(e) {
   console.log('connect:' + options.host + ':' + options.port)
 })
 
+client.on('connect', function(){
+  console.log('connect:' + options.host+ ':' + options.port)
+})
+
 var rl = readline.createInterface(process.stdin, process.stdout)
 rl.on('SIGINT', function() {
   console.log('connect close:' + options.host + ':' + options.port)
@@ -19,18 +23,24 @@ rl.on('SIGINT', function() {
   rl.close()
 })
 
-var i = 0
 client.setTimeout(1000)
 client.on('timeout', function() {
-  var str = i + 'hello\n'
-  process.stdout.write('[S]' + str)
-  client.write(str)
-  i = i + 1
+  var str = ''
+  for (var i = 0; i < 20000; i++){
+    str += 'hello world open'
+  }
+  str += '\n'
+
+  var ret = client.write(str)
+  process.stdout.write('write:' + ret + ', ' + 
+  client.bytesWritten + ', ' + 
+  client.bufferSize + 'byte\n')
 })
 
-client.on('data', function(chunk) {
-  process.stdout.write(chunk.toString())
+client.on('drain', function() {
+  console.log('drain')
 })
+
 
 client.on('end', function(had_error) {
   client.setTimeout(0)
